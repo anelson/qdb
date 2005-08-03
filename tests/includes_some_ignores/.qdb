@@ -1,0 +1,2 @@
+noRotateFilter = $filename =~ /\.norot$/ or $relfilepath eq "kid/ignored by path.txt"
+

@@ -1,0 +1,16 @@
+#This is an arg file
+ lines with leading whitespace
+        or hash marks like # are ignored
+
+--password fooba baz!@#$!@#$!@#$!
+--server itssoogood
+--user ican'tholdit
+
+
+c:\windows
+
+
+g:\docs
+
+c:\program files\windows paths sucks ASS!
+
