@@ -182,7 +182,7 @@ if (!%backup_paths) {
    die "No .qdb files were found in the path(s) searched.  Nothing to backup.\n";
 }
 
-verbose_print $INFO, "Found the following .qdb files:";
+verbose_print $INFO, "Found the following .qdb files:\n";
 for my $folder (sort(keys(%backup_paths))) {
    verbose_print $INFO, "\t", $folder, "\n";
 
