@@ -816,7 +816,7 @@ sub backup_files {
 sub get_rsync_base_cmd {
    #Need to specify a custom SSH command line, to retrieve credentials from identify file
    #and disable prompts
-   my $cmd = "$rsync_cmd --archive --perms --owner --group --times -z --rsh=\"$ssh_cmd -q -A";
+   my $cmd = "$rsync_cmd --archive --perms  --group --times -z --rsh=\"$ssh_cmd -q -A";
    #If there's a qdb identity file in ~/.qdb/qdb_key, attempt to authenticate with that
    if (-e get_home_dir() . "/.qdb/qdb_key") {
       $cmd .= " -i " . get_home_dir() . "/.qdb/qdb_key";
