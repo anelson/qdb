@@ -988,10 +988,19 @@ qdb - Quick and Dirty Backup provides easy rsync-based backup functionality
 
 =head1 SYNOPSIS
 
-B<qdb> B<--server> I<servername> B<--user> I<username>  [B<--password> I<password>] 
-[B<--use-rsyncd>] 
-[B<--argfile> 
-I<argfile>] I<path1> [I<path2> [I<pathN>] ]
+B<qdb> B<--server> I<servername> B<--user> I<username>  
+   [B<--argfile> I<argfile>] 
+   [B<--verbose>]
+   [B<--num_snaps> I<num_snaps>]
+   [B<--snap_set> I<set_name>]
+   [B<--prev_snap_set> I<prev_set_name>]
+   [B<--remote_path> I<remote_path>]
+   [B<--ssh_cmd> I<ssh_cmd>]
+   [B<--rsync_cmd> I<rsync_cmd>]
+   [B<--include_filter> I<include_filter]>
+   I<path1> [
+   I<path2> 
+   [I<pathN>] ]
 
 =head1 DESCRIPTION
 
@@ -1009,21 +1018,11 @@ points in time, without excessive disk usage.
 
 =item B<--server I<servername>> 
 
-Specifies the server to back up to.  An SSH server unless C<--use-rsyncd> is specified.
+Specifies the server to back up to.
    
 =item B<--user I<username>> 
 
 Specifies the username to connect to the server as.
-   
-=item B<--password I<password>> 
-
-Specifies the password to use when connecting.  Be careful putting this on the command
-line.  It would be better to omit it and enter it when prompted, or use C<--argfile I<argfile>>
-to specify this command from a file readable only by your user account.
-   
-=item B<--use-rsyncd> 
-
-Indicates I<servername> specifies an rsyncd server, rather than an ssh server with rsync on it.
    
 =item B<--argfile I<argfile>>
 
@@ -1033,11 +1032,58 @@ a single option or argument on the command line.
 For example:
 
    --server whatever
-   --password spankme
    /home
    /var
    /tmp
 
+=item B<--verbose>
+
+Increases the verbosity of the output.  Use twice for extra verbosity; three times
+for debug verbosity.
+
+=item B<--num_snaps I<num_snaps>>
+
+Sets the number of snapshots to keep before deleting the oldest.  The default is 10
+snapshots.  NB: This limit applies to the current snapshot set only; other snapshot
+sets may be used with other limits.  See B<--snap_set>.
+
+=item B<--snap_set I<set_name>>
+
+The base name of the snapshot set to backup to.  By default set to 'qdb'.  Snapshots
+will be created of the form I<set_name>.I<snap_num>, where I<snap_num> is the one-based
+number of the snapshot, with 1 being the most recent.
+
+=item B<--prev_snap_set I<prev_set_name>>
+
+The name of the snapshot set to compare with for the purposes of the differential
+backup.  By default qdb uses the most recent snapshot in the remote path, regardless 
+of the snap set to which it belongs.  By setting this to the name of a specific
+snap set, qdb will use I<prev_set_name>.1 as the previous snap set, creating hard
+links from there to I<set_name>.1 for files that have not changed.
+
+=item B<--remote_path I<remote_path>>
+
+The path on the remote machine where backups should be placed.  By default, ~/I<machine_name>
+is used.
+
+=item B<--ssh_cmd I<ssh_cmd>>
+
+The command to use to invoke SSH.  Do not include the username or server name;
+these will be appended automatically.
+
+=item B<--rsync_cmd I<rsync_cmd>>
+
+The command to use to invoke rsync.  Do not include the username or server name;
+these will be appended automatically.
+
+=item B<--include_filter I<include_filter>>
+
+Specifies a perl expression of the same form as the include and exclude filters
+in the .qdb files, which must evaluate to true for any file on the paths to be 
+considered for inclusion in the backup.  The criteria become:
+   Global include filter == true
+   .qdb exclude fitler == false
+   
 =item B<path> 
 
 Specifies a path to search for .qdb files.  If no paths are specified, the current directory
