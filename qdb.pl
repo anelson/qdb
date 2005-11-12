@@ -805,7 +805,16 @@ sub backup_files {
       if ($? == 256) {
          die "Failed to execute rsync command [$cmd]\n";
       } else {
-         die "rsync command [$cmd] exited with error $?\n";
+         # Error code is in high byte of $?
+         my $errcode = $? / 256;
+
+         # 24 is a warning code, indicating that one or more files 'vanished'
+         # during backup.  This can happen is the filesystem is modified during
+         # a long-running backup, for example when mail is spooled and delivered.
+         # Vanished files should not fail the backup
+         if ($errcode != 24) {
+            die "rsync command [$cmd] exited with error @errcode\n";
+         }
       }
    }
 }
