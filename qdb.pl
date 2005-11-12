@@ -813,7 +813,7 @@ sub backup_files {
          # a long-running backup, for example when mail is spooled and delivered.
          # Vanished files should not fail the backup
          if ($errcode != 24) {
-            die "rsync command [$cmd] exited with error @errcode\n";
+            die "rsync command [$cmd] exited with error $errcode\n";
          }
       }
    }
