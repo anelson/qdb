@@ -812,7 +812,11 @@ sub backup_files {
          # during backup.  This can happen is the filesystem is modified during
          # a long-running backup, for example when mail is spooled and delivered.
          # Vanished files should not fail the backup
-         if ($errcode != 24) {
+         #
+         # 23 is also a warning, reported when one or more files can't be transfered.
+         # This happens for a similar reason as 24, and is similarly no reason to kill
+         # the backup.
+         if ($errcode != 24 && $errcode != 23) {
             die "rsync command [$cmd] exited with error $errcode\n";
          }
       }
