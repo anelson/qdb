@@ -833,7 +833,12 @@ sub get_rsync_base_cmd {
    #If there's a qdb identity file in ~/.qdb/qdb_key, attempt to authenticate with that
    if (-e get_home_dir() . "/.qdb/qdb_key") {
       $cmd .= " -i " . get_home_dir() . "/.qdb/qdb_key";
+   } elsif (! -e get_home_dir()) {
+      die "Unable to determine path of home directory; make sure HOME env var is set correctly\n";
+   } else {
+      die "An SSH identity file doesn't exist at " . get_home_dir() . "/.qdb/qdb_key" . "; run 'qdb.pl --setup' first\n";
    }
+   
    $cmd .= "\"";
 
    return $cmd;
