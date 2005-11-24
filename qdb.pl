@@ -748,9 +748,12 @@ sub ssh_command {
    #authenticating with that
    #redirect stderr to stdout so it appears in the result of `` execution.
    my $cmd = "$ssh_cmd -q -A 2>&1";
-   #If there's a qdb identity file in ~/.qdb/qdb_key, attempt to authenticate with that
-   if (-e get_home_dir() . "/.qdb/qdb_key") {
-      $cmd .= " -i " . get_home_dir() . "/.qdb/qdb_key";
+   #If there's a qdb identity file, attempt to authenticate with that
+   if (-e $identity_file_path) {
+      $cmd .= " -i " . $identity_file_path;
+      verbose_print $DEBUG, "Getting SSH identity file from $identity_file_path\n";
+   } else {
+      die "An SSH identity file doesn't exist at $identity_file_path; run 'qdb.pl --setup' first, or specify a valid path with --identity_file_path\n";
    }
    $cmd .= " $username\@$server \"$remote_cmd\"";
 
