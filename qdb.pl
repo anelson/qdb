@@ -29,6 +29,7 @@ $num_snaps = 10; #The number of snapshots to keep before the oldest start to get
 $snap_set = "qdb"; #The name of the snapshot set to use by default
 $prev_snap_set = ''; #The snapshot set to link this snapshot to.  Empty means most recent snapshot.
 $remote_path = "~/" . Net::Domain::hostname();
+$identity_file_path = File::Spec->catdir(get_home_dir(), ".qdb/qdb_key");
 $tmp_remote_path = File::Spec->catdir("$remote_path", "qdbtemp"); #The path where the files will be rsync'd to initially
 
 $ssh_cmd = "ssh";
@@ -385,6 +386,7 @@ sub parse_argv {
               'snap_set=s' => \$snap_set,
               'prev_snap_set=s' => \$prev_snap_set,
               'remote_path=s' => \$remote_path,
+              'identity_file_path=s' => \$identity_file_path,
               'ssh_cmd=s' => \$ssh_cmd,
               'rsync_cmd=s' => \$rsync_cmd,
               'include_filter=s' => \$include_filter,
@@ -830,13 +832,12 @@ sub get_rsync_base_cmd {
    #Need to specify a custom SSH command line, to retrieve credentials from identify file
    #and disable prompts
    my $cmd = "$rsync_cmd --links --times -z --rsh=\"$ssh_cmd -q -A";
-   #If there's a qdb identity file in ~/.qdb/qdb_key, attempt to authenticate with that
-   if (-e get_home_dir() . "/.qdb/qdb_key") {
-      $cmd .= " -i " . get_home_dir() . "/.qdb/qdb_key";
-   } elsif (! -e get_home_dir()) {
-      die "Unable to determine path of home directory; make sure HOME env var is set correctly\n";
+   #If there's a qdb identity file, attempt to authenticate with that
+   if (-e $identity_file_path) {
+      $cmd .= " -i " . $identity_file_path;
+      verbose_print $DEBUG, "Getting SSH identity file from $identity_file_path\n";
    } else {
-      die "An SSH identity file doesn't exist at " . get_home_dir() . "/.qdb/qdb_key" . "; run 'qdb.pl --setup' first\n";
+      die "An SSH identity file doesn't exist at $identity_file_path; run 'qdb.pl --setup' first, or specify a valid path with --identity_file_path\n";
    }
    
    $cmd .= "\"";
@@ -1013,6 +1014,7 @@ B<qdb> B<--server> I<servername> B<--user> I<username>
    [B<--snap_set> I<set_name>]
    [B<--prev_snap_set> I<prev_set_name>]
    [B<--remote_path> I<remote_path>]
+   [B<--identity_file_path> I<identity_file_path>]
    [B<--ssh_cmd> I<ssh_cmd>]
    [B<--rsync_cmd> I<rsync_cmd>]
    [B<--include_filter> I<include_filter]>
@@ -1083,6 +1085,12 @@ links from there to I<set_name>.1 for files that have not changed.
 
 The path on the remote machine where backups should be placed.  By default, ~/I<machine_name>
 is used.
+
+=item B<--identity_file_path I<identity_file_path>>
+
+The path to the SSH identity file which will be used for passwordless authentication to the specified server.
+This file is created in B<--setup> mode.  By default, the identity file is looked for in
+~/.qdb/qdb_key.
 
 =item B<--ssh_cmd I<ssh_cmd>>
 
